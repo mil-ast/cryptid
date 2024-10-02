@@ -23,12 +23,6 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      /* colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.black,
-        primary: AppColors.primary,
-        secondary: Colors.black,
-        surface: AppColors.dark,
-      ), */
       primaryColor: AppColors.primary,
       secondaryHeaderColor: AppColors.secondary,
       scaffoldBackgroundColor: const Color(0xfff8f9fa),
@@ -99,6 +93,11 @@ class AppTheme {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
+          ),
+        ),
+        iconButtonTheme: const IconButtonThemeData(
+          style: ButtonStyle(
+            iconColor: WidgetStatePropertyAll(AppColors.primary),
           ),
         ),
         hoverColor: AppColors.secondary,

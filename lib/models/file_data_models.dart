@@ -91,6 +91,7 @@ final class DocumentModel {
 enum FieldType {
   string('Строка'),
   text('Текст'),
+  site('Сайт'),
   password('Пароль');
 
   final String label;

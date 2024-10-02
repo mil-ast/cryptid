@@ -1,17 +1,12 @@
 import 'package:cryptid/features/documents/children/custom_fields_editor/custom_field_editor_widget.dart';
-import 'package:cryptid/models/data_changes_models.dart';
-import 'package:cryptid/models/file_data_models.dart';
+import 'package:cryptid/models/document_edit_data.dart';
 import 'package:flutter/material.dart';
 
 class DialogDocumentCreateWidget extends StatefulWidget {
-  final GroupModel selectedroup;
-  final List<CustomField> customFields;
-  final DocumentType documentType;
+  final CreateDocumentData documentData;
 
   const DialogDocumentCreateWidget({
-    required this.selectedroup,
-    required this.customFields,
-    required this.documentType,
+    required this.documentData,
     super.key,
   });
 
@@ -21,23 +16,12 @@ class DialogDocumentCreateWidget extends StatefulWidget {
 
 class _DialogDocumentCreateWidgetState extends State<DialogDocumentCreateWidget> {
   final _formKey = GlobalKey<FormState>();
-  final titleController = TextEditingController();
-  final List<TextEditingController> customFieldsControllers = [];
-
-  @override
-  void initState() {
-    super.initState();
-
-    for (int i = 0; i < widget.customFields.length; i++) {
-      customFieldsControllers.add(TextEditingController(text: widget.customFields[i].value));
-    }
-  }
 
   @override
   void dispose() {
-    titleController.dispose();
-    for (int i = 0; i < customFieldsControllers.length; i++) {
-      customFieldsControllers[i].dispose();
+    widget.documentData.titleController.dispose();
+    for (int i = 0; i < widget.documentData.fields.length; i++) {
+      widget.documentData.fields[i].controller.dispose();
     }
     super.dispose();
   }
@@ -53,7 +37,7 @@ class _DialogDocumentCreateWidgetState extends State<DialogDocumentCreateWidget>
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
-              controller: titleController,
+              controller: widget.documentData.titleController,
               decoration: const InputDecoration(
                 labelText: 'Название',
               ),
@@ -66,8 +50,7 @@ class _DialogDocumentCreateWidgetState extends State<DialogDocumentCreateWidget>
             ),
             const SizedBox(height: 20),
             CustomFieldsEditorWidget(
-              customFields: widget.customFields,
-              customFieldsControllers: customFieldsControllers,
+              fields: widget.documentData.fields,
             ),
           ],
         ),
@@ -85,21 +68,9 @@ class _DialogDocumentCreateWidgetState extends State<DialogDocumentCreateWidget>
             if (!_formKey.currentState!.validate()) {
               return;
             }
-
-            for (int i = 0; i < widget.customFields.length; i++) {
-              widget.customFields[i].value = customFieldsControllers[i].text;
-            }
-            final model = DocumentModel(
-              titleController.text,
-              type: widget.documentType,
-              customFields: widget.customFields,
-            );
             Navigator.pop(
               context,
-              DialogDocumentResult(
-                documentModel: model,
-                selectedroup: widget.selectedroup,
-              ),
+              widget.documentData,
             );
           },
           label: const Text('Добавить'),

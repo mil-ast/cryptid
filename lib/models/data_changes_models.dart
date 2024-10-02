@@ -1,4 +1,5 @@
 import 'package:cryptid/models/file_data_models.dart';
+import 'package:flutter/material.dart';
 
 final class GroupChangesModel {
   final String name;
@@ -8,7 +9,7 @@ final class GroupChangesModel {
   });
 }
 
-final class DialogDocumentResult {
+/* final class DialogDocumentResult {
   final GroupModel selectedroup;
   final DocumentModel documentModel;
 
@@ -16,4 +17,4 @@ final class DialogDocumentResult {
     required this.selectedroup,
     required this.documentModel,
   });
-}
+} */

@@ -3,6 +3,7 @@ import 'package:cryptid/core/widgets/document_type_icon_widget.dart';
 import 'package:cryptid/models/file_data_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class DocumentCardWidget extends StatefulWidget {
   final DocumentModel document;
@@ -65,6 +66,7 @@ class _FieldItemPasswordState extends State<FieldItemWidget> {
   @override
   Widget build(BuildContext context) {
     final isPassword = widget.field.fieldType == FieldType.password;
+    final isSite = widget.field.fieldType == FieldType.site;
     return Card(
       color: AppColors.secondary,
       child: Padding(
@@ -105,6 +107,13 @@ class _FieldItemPasswordState extends State<FieldItemWidget> {
                         ),
                         onPressed: () {
                           _showPassword!.value = !_showPassword!.value;
+                        },
+                      )
+                    else if (isSite)
+                      IconButton(
+                        icon: const Icon(Icons.open_in_new),
+                        onPressed: () {
+                          launchUrlString(widget.field.value).ignore();
                         },
                       ),
                     IconButton(

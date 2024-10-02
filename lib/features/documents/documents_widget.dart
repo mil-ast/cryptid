@@ -7,7 +7,7 @@ import 'package:cryptid/features/documents/children/document_item_widget.dart';
 import 'package:cryptid/features/documents/children/view_widget/document_card_widget.dart';
 import 'package:cryptid/features/home/bloc/storage_cubit.dart';
 import 'package:cryptid/features/home/column_header_widget.dart';
-import 'package:cryptid/models/data_changes_models.dart';
+import 'package:cryptid/models/document_edit_data.dart';
 import 'package:cryptid/models/file_data_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,51 +21,24 @@ class DocumentsWidget extends StatelessWidget {
       listenWhen: (previous, current) => !current.isBuild,
       listener: (context, state) async {
         if (state is DocumentsShowCreateDialogState) {
-          List<CustomField> customFields;
-          switch (state.documentType) {
-            case DocumentType.note:
-              customFields = [
-                CustomField(title: 'Заметка', value: '', fieldType: FieldType.string),
-              ];
-            case DocumentType.document:
-              customFields = [
-                CustomField(title: 'Логин', value: '', fieldType: FieldType.string),
-                CustomField(title: 'Пароль', value: '', fieldType: FieldType.password),
-              ];
-            case DocumentType.site:
-              customFields = [
-                CustomField(title: 'Сайт', value: '', fieldType: FieldType.string),
-                CustomField(title: 'Логин', value: '', fieldType: FieldType.string),
-                CustomField(title: 'Пароль', value: '', fieldType: FieldType.password),
-              ];
-          }
-
-          final result = await showDialog<DialogDocumentResult>(
+          final result = await showDialog<CreateDocumentData>(
             context: context,
             builder: (context) => DialogDocumentCreateWidget(
-              selectedroup: state.selectedroup,
-              documentType: state.documentType,
-              customFields: customFields,
+              documentData: state.documentData,
             ),
           );
           if (result != null && context.mounted) {
-            context.read<StorageCubit>().saveNewDocument(
-                  document: result.documentModel,
-                  selectedroup: result.selectedroup,
-                );
+            context.read<StorageCubit>().createDocument(result);
           }
         } else if (state is DocumentsShowEditState) {
-          final result = await showDialog<DialogDocumentResult>(
+          final result = await showDialog<EditableDocumentData>(
             context: context,
             builder: (context) => DialogDocumentEditWidget(
-              selectedroup: state.selectedroup,
-              document: state.document,
+              documentData: state.documentData,
             ),
           );
           if (result != null && context.mounted) {
-            context.read<StorageCubit>().updateDocument(
-                  document: result.documentModel,
-                );
+            context.read<StorageCubit>().updateDocument(result);
           }
         } else if (state is DocumentsConfirmDeleteState) {
           final isOk = await showDialog<bool>(
@@ -151,29 +124,35 @@ class SelectedGroupWidget extends StatelessWidget {
                 context: context,
                 position: RelativeRect.fromLTRB(offset.dx, 60, 0, 0),
                 items: [
-                  const PopupMenuItem(
-                    value: DocumentType.note,
-                    child: ListTile(
+                  PopupMenuItem(
+                    child: const ListTile(
                       leading: DocumentIconWidget(DocumentType.note),
                       title: Text('Заметка'),
                       mouseCursor: MouseCursor.defer,
                     ),
+                    onTap: () {
+                      context.read<DocumentsCubit>().showCreateDialog(DocumentType.note);
+                    },
                   ),
-                  const PopupMenuItem(
-                    value: DocumentType.document,
-                    child: ListTile(
+                  PopupMenuItem(
+                    child: const ListTile(
                       leading: DocumentIconWidget(DocumentType.document),
                       title: Text('Документ'),
                       mouseCursor: MouseCursor.defer,
                     ),
+                    onTap: () {
+                      context.read<DocumentsCubit>().showCreateDialog(DocumentType.document);
+                    },
                   ),
-                  const PopupMenuItem(
-                    value: DocumentType.site,
-                    child: ListTile(
+                  PopupMenuItem(
+                    child: const ListTile(
                       leading: DocumentIconWidget(DocumentType.site),
                       title: Text('Сайт'),
                       mouseCursor: MouseCursor.defer,
                     ),
+                    onTap: () {
+                      context.read<DocumentsCubit>().showCreateDialog(DocumentType.site);
+                    },
                   ),
                 ],
               );
