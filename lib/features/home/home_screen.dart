@@ -1,3 +1,4 @@
+import 'package:cryptid/core/widgets/dialogs/about_dialog.dart';
 import 'package:cryptid/core/widgets/dialogs/change_password_dialog.dart';
 import 'package:cryptid/domain/crypt_service.dart';
 import 'package:cryptid/features/documents/bloc/documents_bloc.dart';
@@ -11,6 +12,8 @@ import 'package:cryptid/features/home/password_input_widget.dart';
 import 'package:cryptid/scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -102,7 +105,41 @@ class HomeScreen extends StatelessWidget {
                   },
                 ),
                 const Divider(),
-                FilePathWidget(state.filePath),
+                Row(
+                  children: [
+                    Expanded(child: FilePathWidget(state.filePath)),
+                    IconButton(
+                      onPressed: () {
+                        showAboutDialog(
+                          context: context,
+                          applicationIcon: SvgPicture.asset(
+                            'assets/logo.svg',
+                            width: 52,
+                            height: 52,
+                          ),
+                          applicationName: 'Cryptid',
+                          useRootNavigator: false,
+                          applicationVersion: DependenciesScope.of(context).packageInfo.version,
+                          children: [
+                            TextButton.icon(
+                              onPressed: () {
+                                launchUrlString('https://github.com/mil-ast/cryptid').ignore();
+                              },
+                              label: const Text('cryptid'),
+                              icon: SvgPicture.asset(
+                                'assets/github.svg',
+                                width: 24,
+                                height: 24,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      icon: const Icon(Icons.info_outline),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                ),
               ],
             );
           },

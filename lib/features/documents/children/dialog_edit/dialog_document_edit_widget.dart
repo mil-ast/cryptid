@@ -1,15 +1,13 @@
+import 'package:cryptid/core/extensions/build_context_extension.dart';
 import 'package:cryptid/features/documents/children/custom_fields_editor/custom_field_editor_widget.dart';
-import 'package:cryptid/models/data_changes_models.dart';
-import 'package:cryptid/models/file_data_models.dart';
+import 'package:cryptid/models/document_edit_data.dart';
 import 'package:flutter/material.dart';
 
 class DialogDocumentEditWidget extends StatefulWidget {
-  final GroupModel selectedroup;
-  final DocumentModel document;
+  final EditableDocumentData documentData;
 
   const DialogDocumentEditWidget({
-    required this.selectedroup,
-    required this.document,
+    required this.documentData,
     super.key,
   });
 
@@ -19,62 +17,56 @@ class DialogDocumentEditWidget extends StatefulWidget {
 
 class _DialogDocumentEditWidgetState extends State<DialogDocumentEditWidget> {
   final _formKey = GlobalKey<FormState>();
-  final titleController = TextEditingController();
-  final List<TextEditingController> customFieldsControllers = [];
-
-  @override
-  void initState() {
-    super.initState();
-    titleController.text = widget.document.title;
-    for (int i = 0; i < widget.document.customFields.length; i++) {
-      customFieldsControllers.add(TextEditingController(text: widget.document.customFields[i].value));
-    }
-  }
 
   @override
   void dispose() {
-    titleController.dispose();
-    for (int i = 0; i < customFieldsControllers.length; i++) {
-      customFieldsControllers[i].dispose();
+    widget.documentData.titleController.dispose();
+    for (int i = 0; i < widget.documentData.fields.length; i++) {
+      widget.documentData.fields[i].controller.dispose();
     }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final dialogSize = context.getDialogSize(minWidth: 300, minHeight: 300);
+
     return AlertDialog(
-      title: const Text('Добавить новый секрет'),
-      content: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Название',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Обязательно к заполнению';
-                }
-                return null;
-              },
+      title: const Text('Изменить секрет'),
+      content: SizedBox(
+        width: dialogSize.width,
+        height: dialogSize.height,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: widget.documentData.titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Название',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Обязательно к заполнению';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                CustomFieldsEditorWidget(
+                  fields: widget.documentData.fields,
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            CustomFieldsEditorWidget(
-              customFields: widget.document.customFields,
-              customFieldsControllers: customFieldsControllers,
-            ),
-          ],
+          ),
         ),
       ),
       actions: [
         TextButton.icon(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: Navigator.of(context).pop,
           label: const Text('Отмена'),
           icon: const Icon(Icons.cancel),
         ),
@@ -84,16 +76,9 @@ class _DialogDocumentEditWidgetState extends State<DialogDocumentEditWidget> {
               return;
             }
 
-            widget.document.title = titleController.text;
-            for (int i = 0; i < widget.document.customFields.length; i++) {
-              widget.document.customFields[i].value = customFieldsControllers[i].text;
-            }
             Navigator.pop(
               context,
-              DialogDocumentResult(
-                documentModel: widget.document,
-                selectedroup: widget.selectedroup,
-              ),
+              widget.documentData,
             );
           },
           label: const Text('Сохранить'),

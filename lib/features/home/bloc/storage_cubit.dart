@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cryptid/domain/crypt_service.dart';
 import 'package:cryptid/models/data_changes_models.dart';
+import 'package:cryptid/models/document_edit_data.dart';
 import 'package:cryptid/models/file_data_models.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,7 +13,7 @@ part 'storage_states.dart';
 
 class StorageCubit extends Cubit<StorageState> {
   static const _spKeyFilePath = 'filePath';
-  static const _defaultFileName = 'cryptid.aes';
+  static const _defaultFileName = 'secrets.cryptid';
   final SharedPreferences _sp;
   final IEncrypterService _encrypter;
   File? _file;
@@ -151,20 +152,44 @@ class StorageCubit extends Cubit<StorageState> {
     emit(StorageUpdateState(StorageUpdateAction.deleteGroup, fileContent: _fileContent!, model: group));
   }
 
-  Future<void> saveNewDocument({
-    required GroupModel selectedroup,
-    required DocumentModel document,
-  }) async {
-    selectedroup.documents.add(document);
+  Future<void> createDocument(CreateDocumentData data) async {
+    final newDocument = DocumentModel(
+      data.titleController.text,
+      type: data.documentType,
+      customFields: data.fields
+          .map((d) => CustomField(
+                title: d.title,
+                value: d.controller.text,
+                fieldType: d.fieldType,
+              ))
+          .toList(),
+    );
+    data.selectedroup.documents.add(newDocument);
     await saveFileContent();
-    emit(StorageUpdateState(StorageUpdateAction.addDocument, fileContent: _fileContent!, model: document));
+    emit(StorageUpdateState(
+      StorageUpdateAction.addDocument,
+      fileContent: _fileContent!,
+      model: newDocument,
+    ));
   }
 
-  Future<void> updateDocument({
-    required DocumentModel document,
-  }) async {
+  Future<void> updateDocument(EditableDocumentData data) async {
+    data.document.title = data.titleController.text;
+    data.document.customFields = data.fields
+        .map(
+          (d) => CustomField(
+            title: d.title,
+            value: d.controller.text,
+            fieldType: d.fieldType,
+          ),
+        )
+        .toList();
     await saveFileContent();
-    emit(StorageUpdateState(StorageUpdateAction.editDocument, fileContent: _fileContent!, model: document));
+    emit(StorageUpdateState(
+      StorageUpdateAction.editDocument,
+      fileContent: _fileContent!,
+      model: data.document,
+    ));
   }
 
   Future<void> deleteDocument({

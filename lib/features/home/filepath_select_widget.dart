@@ -31,7 +31,7 @@ class FilepathSelectWidget extends StatelessWidget {
                       allowMultiple: false,
                       withData: true,
                       type: FileType.custom,
-                      allowedExtensions: ['aes'],
+                      allowedExtensions: ['cryptid'],
                     );
                     if (result != null && result.count > 0) {
                       final file = result.files.first;

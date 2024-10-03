@@ -10,20 +10,16 @@ class DocumentsEmptyState extends DocumentsState {
 }
 
 class DocumentsShowCreateDialogState extends DocumentsState {
-  final DocumentType documentType;
-  final GroupModel selectedroup;
+  final CreateDocumentData documentData;
   const DocumentsShowCreateDialogState({
-    required this.documentType,
-    required this.selectedroup,
+    required this.documentData,
   }) : super(false);
 }
 
 class DocumentsShowEditState extends DocumentsState {
-  final DocumentModel document;
-  final GroupModel selectedroup;
+  final EditableDocumentData documentData;
   const DocumentsShowEditState({
-    required this.document,
-    required this.selectedroup,
+    required this.documentData,
   }) : super(false);
 }
 
