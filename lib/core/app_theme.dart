@@ -8,6 +8,7 @@ class AppColors {
   static const success = Color(0xFF73ba00);
   static const warning = Color(0xffff5c00);
   static const textGrey = Color(0xffc2c2c2);
+  static const textFieldUnderline = Color(0xff74777f);
 }
 
 extension ColorSchemeExt on ColorScheme {
@@ -71,7 +72,6 @@ class AppTheme {
   }
 
   static get darkTheme => ThemeData(
-        //brightness: Brightness.dark,
         primaryColor: Colors.white,
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.dark).copyWith(
           surface: AppColors.dark,
@@ -121,7 +121,6 @@ class AppTheme {
         cardTheme: const CardTheme(
           color: Colors.transparent,
           shadowColor: Colors.transparent,
-          //shape: Border(left: BorderSide(color: Color(0xff383838), width: 1)),
         ),
         dividerColor: const Color(0xff383838),
         dividerTheme: const DividerThemeData(

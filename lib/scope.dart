@@ -45,7 +45,6 @@ class DependenciesScope extends InheritedWidget {
     if (scope == null) {
       throw Exception('DependenciesScope not found in context');
     }
-
     return scope.dependencies;
   }
 

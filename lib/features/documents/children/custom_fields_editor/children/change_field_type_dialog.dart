@@ -1,4 +1,5 @@
 import 'package:cryptid/core/app_theme.dart';
+import 'package:cryptid/core/extensions/build_context_extension.dart';
 import 'package:cryptid/models/file_data_models.dart';
 import 'package:flutter/material.dart';
 
@@ -8,22 +9,14 @@ class ChangeFieldTypeDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width;
-    var height = MediaQuery.of(context).size.height;
-
-    if (width > 400) {
-      width = 400;
-    }
-    if (height > 300) {
-      height = 300;
-    }
+    final dialogSize = context.getDialogSize(minWidth: 300, minHeight: 200, maxWidth: 340, maxHeight: 200);
     return AlertDialog(
       title: const Text('Выберите тип поля'),
       backgroundColor: AppColors.secondary,
       content: SingleChildScrollView(
         child: SizedBox(
-          width: width - 100,
-          height: height - 100,
+          width: dialogSize.width,
+          height: dialogSize.height,
           child: ListView.builder(
             itemCount: FieldType.values.length,
             itemBuilder: (context, i) => ListTile(
@@ -39,6 +32,13 @@ class ChangeFieldTypeDialog extends StatelessWidget {
           ),
         ),
       ),
+      actions: [
+        TextButton.icon(
+          onPressed: Navigator.of(context).pop,
+          label: const Text('Отмена'),
+          icon: const Icon(Icons.cancel),
+        ),
+      ],
     );
   }
 }

@@ -9,33 +9,26 @@ void main() async {
 
   final dependencies = await Dependencies.initialize();
 
-  runApp(DependenciesScope(
-    dependencies: dependencies,
-    child: const App(),
-  ));
-}
-
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Cryptid',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
-      localizationsDelegates: const [
-        GlobalWidgetsLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('ru', ''),
-      ],
-      locale: const Locale('ru', ''),
-      home: const HomeScreen(),
-    );
-  }
+  runApp(
+    DependenciesScope(
+      dependencies: dependencies,
+      child: MaterialApp(
+        title: 'Cryptid',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.dark,
+        localizationsDelegates: const [
+          GlobalWidgetsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('ru', ''),
+        ],
+        locale: const Locale('ru', ''),
+        home: const HomeScreen(),
+      ),
+    ),
+  );
 }

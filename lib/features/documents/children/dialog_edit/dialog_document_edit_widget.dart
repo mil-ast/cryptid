@@ -1,3 +1,4 @@
+import 'package:cryptid/core/extensions/build_context_extension.dart';
 import 'package:cryptid/features/documents/children/custom_fields_editor/custom_field_editor_widget.dart';
 import 'package:cryptid/models/document_edit_data.dart';
 import 'package:flutter/material.dart';
@@ -28,38 +29,44 @@ class _DialogDocumentEditWidgetState extends State<DialogDocumentEditWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final dialogSize = context.getDialogSize(minWidth: 300, minHeight: 300);
+
     return AlertDialog(
       title: const Text('Изменить секрет'),
-      content: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: widget.documentData.titleController,
-              decoration: const InputDecoration(
-                labelText: 'Название',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Обязательно к заполнению';
-                }
-                return null;
-              },
+      content: SizedBox(
+        width: dialogSize.width,
+        height: dialogSize.height,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: widget.documentData.titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Название',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Обязательно к заполнению';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                CustomFieldsEditorWidget(
+                  fields: widget.documentData.fields,
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            CustomFieldsEditorWidget(
-              fields: widget.documentData.fields,
-            ),
-          ],
+          ),
         ),
       ),
       actions: [
         TextButton.icon(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: Navigator.of(context).pop,
           label: const Text('Отмена'),
           icon: const Icon(Icons.cancel),
         ),
