@@ -1,15 +1,17 @@
-import 'package:cryptid/core/app_theme.dart';
-import 'package:cryptid/domain/storage/password_generator_service.dart';
 import 'package:flutter/material.dart';
 
-class PasswordGeneratorWidget extends StatefulWidget {
-  const PasswordGeneratorWidget({super.key});
+import 'package:cryptid/core/app_theme.dart';
+import 'package:cryptid/domain/storage/password_generator_service.dart';
+import 'package:flutter/services.dart';
+
+class PasswordGeneratorDialog extends StatefulWidget {
+  const PasswordGeneratorDialog({super.key});
 
   @override
-  State<PasswordGeneratorWidget> createState() => _PasswordGeneratorWidgetState();
+  State<PasswordGeneratorDialog> createState() => _PasswordGeneratorDialogState();
 }
 
-class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
+class _PasswordGeneratorDialogState extends State<PasswordGeneratorDialog> {
   double _passwordLength = 16;
   String _password = '';
   bool isNumber = true;
@@ -17,7 +19,7 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
   bool upper = true;
   bool lower = true;
 
-  _PasswordGeneratorWidgetState() {
+  _PasswordGeneratorDialogState() {
     _updatePassword();
   }
 
@@ -25,14 +27,14 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: AppColors.secondary,
-      title: const Text('Пароль'),
+      title: const Text('Генерация пароля'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Slider(
             value: _passwordLength,
             max: 30,
-            min: 10,
+            min: 6,
             divisions: 20,
             label: _passwordLength.toStringAsFixed(0),
             onChanged: (value) {
@@ -68,6 +70,13 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
                   });
                 },
                 icon: const Icon(Icons.refresh_outlined),
+              ),
+              IconButton(
+                tooltip: 'Скопировать',
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: _password)).ignore();
+                },
+                icon: const Icon(Icons.copy_outlined),
               ),
             ],
           ),
@@ -155,13 +164,6 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
           label: const Text('Закрыть'),
           icon: const Icon(Icons.close_outlined),
           onPressed: Navigator.of(context).pop,
-        ),
-        FilledButton.icon(
-          label: const Text('Применить'),
-          icon: const Icon(Icons.done),
-          onPressed: () {
-            Navigator.of(context).pop(_password);
-          },
         ),
       ],
     );

@@ -1,5 +1,5 @@
-import 'package:cryptid/core/widgets/dialogs/about_dialog.dart';
 import 'package:cryptid/core/widgets/dialogs/change_password_dialog.dart';
+import 'package:cryptid/core/widgets/dialogs/password_generator_dialog.dart';
 import 'package:cryptid/domain/crypt_service.dart';
 import 'package:cryptid/features/documents/bloc/documents_bloc.dart';
 import 'package:cryptid/features/documents/documents_widget.dart';
@@ -107,37 +107,80 @@ class HomeScreen extends StatelessWidget {
                 const Divider(),
                 Row(
                   children: [
-                    Expanded(child: FilePathWidget(state.filePath)),
-                    IconButton(
-                      onPressed: () {
-                        showAboutDialog(
-                          context: context,
-                          applicationIcon: SvgPicture.asset(
-                            'assets/logo.svg',
-                            width: 52,
-                            height: 52,
-                          ),
-                          applicationName: 'Cryptid',
-                          useRootNavigator: false,
-                          applicationVersion: DependenciesScope.of(context).packageInfo.version,
-                          children: [
-                            TextButton.icon(
-                              onPressed: () {
-                                launchUrlString('https://github.com/mil-ast/cryptid').ignore();
-                              },
-                              label: const Text('cryptid'),
-                              icon: SvgPicture.asset(
-                                'assets/github.svg',
-                                width: 24,
-                                height: 24,
-                              ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: PopupMenuButton<void>(
+                        tooltip: 'Меню',
+                        icon: const Icon(Icons.menu_outlined),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            onTap: context.read<StorageCubit>().changeFile,
+                            child: const ListTile(
+                              leading: Icon(Icons.file_open_outlined),
+                              title: Text('Открыть другой файл'),
+                              mouseCursor: MouseCursor.defer,
                             ),
-                          ],
-                        );
-                      },
-                      icon: const Icon(Icons.info_outline),
+                          ),
+                          PopupMenuItem(
+                            onTap: context.read<StorageCubit>().showChangePasswordDialog,
+                            child: const ListTile(
+                              leading: Icon(Icons.lock_outline),
+                              title: Text('Изменить пароль'),
+                              mouseCursor: MouseCursor.defer,
+                            ),
+                          ),
+                          const PopupMenuDivider(),
+                          PopupMenuItem(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => const PasswordGeneratorDialog(),
+                              ).ignore();
+                            },
+                            child: const ListTile(
+                              leading: Icon(Icons.password_outlined),
+                              title: Text('Генератор паролей'),
+                              mouseCursor: MouseCursor.defer,
+                            ),
+                          ),
+                          PopupMenuItem(
+                            onTap: () {
+                              showAboutDialog(
+                                context: context,
+                                applicationIcon: SvgPicture.asset(
+                                  'assets/logo.svg',
+                                  width: 52,
+                                  height: 52,
+                                ),
+                                applicationName: 'Cryptid',
+                                useRootNavigator: false,
+                                applicationVersion: DependenciesScope.of(context).packageInfo.version,
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      launchUrlString('https://github.com/mil-ast/cryptid').ignore();
+                                    },
+                                    label: const Text('cryptid'),
+                                    icon: SvgPicture.asset(
+                                      'assets/github.svg',
+                                      width: 24,
+                                      height: 24,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                            child: const ListTile(
+                              leading: Icon(Icons.info_outline),
+                              title: Text('О приложении'),
+                              mouseCursor: MouseCursor.defer,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 20),
+                    FilePathWidget(state.filePath),
                   ],
                 ),
               ],
