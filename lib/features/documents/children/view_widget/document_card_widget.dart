@@ -103,7 +103,7 @@ class _FieldItemPasswordState extends State<FieldItemWidget> {
                         icon: ValueListenableBuilder(
                           valueListenable: _showPassword!,
                           builder: (context, isShow, _) =>
-                              Icon(isShow ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                              Icon(isShow ? Icons.visibility_off_outlined : Icons.visibility_outlined),
                         ),
                         onPressed: () {
                           _showPassword!.value = !_showPassword!.value;
@@ -118,7 +118,7 @@ class _FieldItemPasswordState extends State<FieldItemWidget> {
                       ),
                     IconButton(
                       onPressed: () {
-                        Clipboard.setData(ClipboardData(text: widget.field.value));
+                        Clipboard.setData(ClipboardData(text: widget.field.value)).ignore();
                       },
                       icon: const Icon(Icons.copy_outlined),
                     )

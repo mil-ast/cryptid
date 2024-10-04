@@ -1,8 +1,6 @@
-import 'package:cryptid/core/app_theme.dart';
 import 'package:cryptid/features/documents/children/custom_fields_editor/children/create_field_dialog.dart';
 import 'package:cryptid/features/documents/children/custom_fields_editor/text_field_widget.dart';
 import 'package:cryptid/models/document_edit_data.dart';
-import 'package:cryptid/models/file_data_models.dart';
 import 'package:flutter/material.dart';
 
 class CustomFieldsEditorWidget extends StatefulWidget {
