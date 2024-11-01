@@ -58,13 +58,19 @@ class _PasswordInputUnclockWidgetState extends State<PasswordInputUnclockWidget>
           width: 200,
           child: Column(
             children: [
-              TextFormField(
+              TextField(
                 autofocus: true,
                 controller: passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Пароль',
                 ),
+                onSubmitted: (newValue) {
+                  context.read<StorageCubit>().onPasswordEnter(
+                        filePath: widget.filePath,
+                        password: newValue,
+                      );
+                },
               ),
               const SizedBox(height: 20),
               FilledButton.icon(

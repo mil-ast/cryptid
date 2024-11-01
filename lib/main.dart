@@ -1,4 +1,5 @@
 import 'package:cryptid/core/app_theme.dart';
+import 'package:cryptid/core/widgets/app_scope_widget.dart';
 import 'package:cryptid/features/home/home_screen.dart';
 import 'package:cryptid/scope.dart';
 import 'package:flutter/material.dart';
@@ -24,10 +25,12 @@ void main() async {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: const [
-          Locale('ru', ''),
+          Locale('ru', 'RU'),
         ],
-        locale: const Locale('ru', ''),
-        home: const HomeScreen(),
+        locale: const Locale('ru', 'RU'),
+        home: const AppScopeWidget(
+          child: HomeScreen(),
+        ),
       ),
     ),
   );
