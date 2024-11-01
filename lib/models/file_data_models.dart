@@ -1,7 +1,11 @@
+import 'package:cryptid/models/properties_model.dart';
+
 class FileContent {
   List<GroupModel> groups;
+  PropertiesModel? properties;
   FileContent({
     required this.groups,
+    this.properties,
   });
 
   factory FileContent.empty() => FileContent(groups: []);
@@ -15,15 +19,20 @@ class FileContent {
               (e) => e.toJson(),
             )
             .toList(),
+        'props': properties?.toJson(),
       };
 
   factory FileContent.fromJson(Map<String, dynamic> json) => FileContent(
-      groups: (json['groups'] as List<dynamic>)
-          .cast<Map<String, Object?>>()
-          .map(
-            (e) => GroupModel.fromJson(e),
-          )
-          .toList());
+        groups: (json['groups'] as List<dynamic>)
+            .cast<Map<String, Object?>>()
+            .map(
+              (e) => GroupModel.fromJson(e),
+            )
+            .toList(),
+        properties: json['props'] != null
+            ? PropertiesModel.fromJson((json['props'] as Map<dynamic, dynamic>).cast<String, Object>())
+            : null,
+      );
 }
 
 class GroupModel {

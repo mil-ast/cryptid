@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   static const primary = Color(0xffe86114);
   static const dark = Color(0xff1f2125);
+  static const dark2 = Color.fromARGB(255, 34, 37, 41);
   static const secondary = Color(0xff27292d);
   static const actions = Color(0xFFFF9800);
   static const success = Color(0xFF73ba00);

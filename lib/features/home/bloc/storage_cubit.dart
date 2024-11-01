@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cryptid/domain/backup/ibackup.dart';
+import 'package:cryptid/domain/crypt/icrypt.dart';
 import 'package:cryptid/domain/crypt_service.dart';
 import 'package:cryptid/models/data_changes_models.dart';
 import 'package:cryptid/models/document_edit_data.dart';
 import 'package:cryptid/models/file_data_models.dart';
+import 'package:cryptid/models/properties_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +19,7 @@ class StorageCubit extends Cubit<StorageState> {
   static const _defaultFileName = 'secrets.cryptid';
   final SharedPreferences _sp;
   final IEncrypterService _encrypter;
+  final IBackupService _backup;
   File? _file;
   String? _filePassword;
   FileContent? _fileContent;
@@ -23,8 +27,10 @@ class StorageCubit extends Cubit<StorageState> {
   StorageCubit({
     required SharedPreferences sp,
     required IEncrypterService encrypter,
+    required IBackupService backup,
   })  : _sp = sp,
         _encrypter = encrypter,
+        _backup = backup,
         super(const StorageLoadingState()) {
     _initialize().ignore();
   }
@@ -103,7 +109,6 @@ class StorageCubit extends Cubit<StorageState> {
         await _file!.writeAsBytes(encryptedData);
 
         _filePassword = password;
-
         _fileContent = fileContent;
 
         emit(StorageSuccessState(
@@ -113,13 +118,7 @@ class StorageCubit extends Cubit<StorageState> {
         return;
       }
 
-      // open and decrypt file
-      final encryptedData = await _file!.readAsBytes();
-      final decrypt = _encrypter.decrypt(encryptedData, password);
-      final message = utf8.decode(decrypt);
-
-      final sourceJson = jsonDecode(message);
-      _fileContent = FileContent.fromJson(sourceJson);
+      await _readFile(_file!, password);
 
       _filePassword = password;
 
@@ -136,19 +135,19 @@ class StorageCubit extends Cubit<StorageState> {
 
   Future<void> saveNewGroup(GroupModel group) async {
     _fileContent!.groups.add(group);
-    await saveFileContent();
+    await _saveFileContent();
     emit(StorageUpdateState(StorageUpdateAction.addGroup, fileContent: _fileContent!, model: group));
   }
 
   Future<void> updateGroup(GroupModel group, GroupChangesModel model) async {
     group.name = model.name;
-    await saveFileContent();
+    await _saveFileContent();
     emit(StorageUpdateState(StorageUpdateAction.editGroup, fileContent: _fileContent!, model: group));
   }
 
   Future<void> deleteGroup(GroupModel group) async {
     _fileContent?.groups.remove(group);
-    await saveFileContent();
+    await _saveFileContent();
     emit(StorageUpdateState(StorageUpdateAction.deleteGroup, fileContent: _fileContent!, model: group));
   }
 
@@ -165,7 +164,7 @@ class StorageCubit extends Cubit<StorageState> {
           .toList(),
     );
     data.selectedroup.documents.add(newDocument);
-    await saveFileContent();
+    await _saveFileContent();
     emit(StorageUpdateState(
       StorageUpdateAction.addDocument,
       fileContent: _fileContent!,
@@ -184,7 +183,7 @@ class StorageCubit extends Cubit<StorageState> {
           ),
         )
         .toList();
-    await saveFileContent();
+    await _saveFileContent();
     emit(StorageUpdateState(
       StorageUpdateAction.editDocument,
       fileContent: _fileContent!,
@@ -197,36 +196,8 @@ class StorageCubit extends Cubit<StorageState> {
     required DocumentModel document,
   }) async {
     selectedroup.documents.remove(document);
-    await saveFileContent();
+    await _saveFileContent();
     emit(StorageUpdateState(StorageUpdateAction.addDocument, fileContent: _fileContent!, model: document));
-  }
-
-  Future<void> saveFileContent() async {
-    try {
-      final sourceJson = _fileContent?.toJson();
-      final strData = jsonEncode(sourceJson);
-      final filePath = _sp.getString(_spKeyFilePath);
-
-      if (filePath == null) {
-        emit(const StorageAskFilePathState());
-        return;
-      }
-      if (_filePassword == null) {
-        emit(StorageAskPasswordState(
-          filePath: filePath,
-        ));
-        return;
-      }
-
-      final file = File(filePath);
-      if (!await file.exists()) {
-        await file.create();
-      }
-      final encryptedData = _encrypter.encrypt(utf8.encode(strData), _filePassword!);
-      await file.writeAsBytes(encryptedData);
-    } catch (e, st) {
-      emit(StorageState.failure(e, st: st));
-    }
   }
 
   void showChangePasswordDialog() {
@@ -239,7 +210,7 @@ class StorageCubit extends Cubit<StorageState> {
       _encrypter.decrypt(encryptedData, currentPwd);
 
       _filePassword = newPwd;
-      await saveFileContent();
+      await _saveFileContent();
 
       final filePath = _file!.path;
 
@@ -258,5 +229,72 @@ class StorageCubit extends Cubit<StorageState> {
       return e.toString();
     }
     return null;
+  }
+
+  Future<void> addBackup(BackupValue value) async {
+    if (_fileContent!.properties == null) {
+      _fileContent!.properties = PropertiesModel(backup: []);
+    }
+    _fileContent!.properties!.backup.add(value);
+    await _saveFileContent();
+  }
+
+  Future<void> deleteBackup(BackupValue value) async {
+    if (_fileContent!.properties == null) {
+      _fileContent!.properties = PropertiesModel(backup: []);
+    }
+    final isDeleted = _fileContent!.properties!.backup.remove(value);
+    if (isDeleted) {
+      await _saveFileContent();
+    }
+  }
+
+  Future<void> _readFile(File file, String password) async {
+    final encryptedData = await _file!.readAsBytes();
+    final decrypt = _encrypter.decrypt(encryptedData, password);
+    final message = utf8.decode(decrypt);
+
+    final sourceJson = jsonDecode(message);
+    _fileContent = FileContent.fromJson(sourceJson);
+  }
+
+  Future<void> _saveFileContent() async {
+    try {
+      final strData = jsonEncode(_fileContent!);
+      final filePath = _sp.getString(_spKeyFilePath);
+
+      if (filePath == null) {
+        emit(const StorageAskFilePathState());
+        return;
+      }
+      if (_filePassword == null) {
+        emit(StorageAskPasswordState(
+          filePath: filePath,
+        ));
+        return;
+      }
+
+      final file = File(filePath);
+      if (!await file.exists()) {
+        await file.create();
+      }
+
+      final encryptedData = _encrypter.encrypt(utf8.encode(strData), _filePassword!);
+      await file.writeAsBytes(encryptedData);
+
+      if (_fileContent!.properties?.backup != null) {
+        try {
+          await _backup.createBackup(encryptedData, _fileContent!.properties!.backup);
+        } on List<Object> catch (errs) {
+          for (final e in errs) {
+            emit(StorageState.failure('Не удалось сохранить резервную копию: $e'));
+          }
+        } catch (e) {
+          emit(StorageState.failure('Не удалось сохранить резервную копию: $e'));
+        }
+      }
+    } catch (e, st) {
+      emit(StorageState.failure(e, st: st));
+    }
   }
 }
